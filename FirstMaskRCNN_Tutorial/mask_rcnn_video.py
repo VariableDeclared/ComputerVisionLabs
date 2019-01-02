@@ -41,7 +41,7 @@ print("[INFO] loading Mask R-CNN from disk...")
 net = cv2.dnn.readNetFromTensorflow(weightsPath, configPath)
 
 # initialize the video stream and point to output video file.
-vs = cv2.VideoCapture(args["input"])
+vs = cv2.VideoCapture(0)
 writer = None
 
 # try to determine the total number of frams in the video file
@@ -56,13 +56,12 @@ try:
 except:
     print("[INFO] could not determine # of frames in video")
     total = -1
-
+cv2.namedWindow("Feed", cv2.WINDOW_AUTOSIZE)
 # loop over frames from the video file stream
 while True:
     try:
         # read the next frame from the file
         (grabbed, frame) = vs.read()
-
         # if the frame was not grabbed, then we have reached the end
         # of the stream
         if not grabbed:
@@ -138,15 +137,19 @@ while True:
             fourcc = cv2.VideoWriter_fourcc(*"MJPG")
             writer = cv2.VideoWriter(args["output"], fourcc, 10,
                         (frame.shape[1], frame.shape[0]), True)
-
+            
             # some information on processing single frame
             if total > 0:
                 elap = (end - start)
                 print("[INFO] single frame to {:.4f} seconds".format(elap))
                 print("[INFO] estimate total time to finish: {:.4f}".format(elap * total))
-
+        
         # write the output frame to disk
         writer.write(frame)
+        cv2.imshow("Feed", frame)
+        
+        if cv2.waitKey(30) & 0xFF == ord('q'):
+            break
     except:
         break
 
